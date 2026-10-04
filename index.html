@@ -293,7 +293,26 @@
 
     // === NATIVE BRIDGE FOR CAMERA/GALLERY ===
     function selectFoto() {
-        document.getElementById('client-foto-input').click();
+        // Нативный системный диалог: камера или галерея
+        var input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        // Без capture — браузер покажет системный выбор
+        input.onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            showPreloader();
+            loadImage(
+                file,
+                function(canvas) {
+                    var fixedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    closePreloader();
+                    fotoCrop(fixedDataUrl);
+                },
+                { canvas: true, orientation: true, maxWidth: 1600, maxHeight: 1600 }
+            );
+        };
+        input.click();
     }
     function onNativeImageSelected(base64Data) {
         if(base64Data && base64Data.indexOf('data:image') === 0) { fotoCrop(base64Data); }
